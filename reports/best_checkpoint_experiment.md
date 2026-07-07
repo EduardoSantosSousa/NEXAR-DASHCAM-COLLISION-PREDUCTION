@@ -78,7 +78,7 @@ checkpoint. Threshold sweeps remain necessary.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `temporal_alert_224_split_best` | 0.70 | 0.65 | 0.636 | 0.700 | 0.400 | -14.495 s |
 | `temporal_alert_224_split_best` | 0.60 | 0.66 | 0.667 | 0.600 | 0.300 | -15.638 s |
-| `temporal_alert_224_pretrained_best` | 0.70 | 0.22 | 0.667 | 0.800 | 0.400 | -8.116 s |
+| `temporal_alert_224_pretrained_best` | 0.70 | 0.23 | 0.667 | 0.800 | 0.400 | -7.616 s |
 | `temporal_alert_224_pretrained_best` | 0.50 | 0.21 | 0.667 | 0.800 | 0.400 | -9.741 s |
 
 ## Interpretation
@@ -92,6 +92,25 @@ The result is still not final because the validation set has only 20 videos and
 the threshold is selected on that same validation split. However, the experiment
 is a stronger and more defensible baseline before testing imbalance handling and
 temporal aggregation.
+
+## Temporal Aggregation Follow-Up
+
+Simple temporal aggregation was tested after this best-checkpoint experiment.
+The strongest follow-up result uses the pretrained best checkpoint with a
+2-consecutive-frame alert rule:
+
+| Post-processing | Threshold | Precision | Recall | False alarm rate | Mean alert error |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 2 consecutive frames | 0.13 | 0.727 | 0.800 | 0.300 | -7.991 s |
+
+This improves over the raw pretrained best operating point, which had precision
+`0.667`, recall `0.800`, and false alarm rate `0.400`.
+
+See:
+
+```text
+reports/temporal_aggregation_experiment.md
+```
 
 ## Review Notebook
 

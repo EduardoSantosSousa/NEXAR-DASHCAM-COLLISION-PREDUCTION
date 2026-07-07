@@ -210,7 +210,7 @@ The stronger result appears after threshold tuning:
 | Model | Minimum recall constraint | Threshold | Precision | Recall | False alarm rate | Mean alert error |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `temporal_alert_224_split_best` | 0.70 | 0.65 | 0.636 | 0.700 | 0.400 | -14.495 s |
-| `temporal_alert_224_pretrained_best` | 0.70 | 0.22 | 0.667 | 0.800 | 0.400 | -8.116 s |
+| `temporal_alert_224_pretrained_best` | 0.70 | 0.23 | 0.667 | 0.800 | 0.400 | -7.616 s |
 
 This means best-checkpoint selection materially improves the pretrained
 experiment: it reaches higher recall at the same false alarm rate and alerts less

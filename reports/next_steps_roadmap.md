@@ -29,6 +29,7 @@ data/interim/sample_100_videos_splits.csv
 data/interim/temporal_frames_224_manifest.csv
 reports/experiment_comparison_val.md
 reports/best_checkpoint_experiment.md
+reports/temporal_aggregation_experiment.md
 reports/mlflow_tracking.md
 notebooks/07_validation_experiment_analysis.ipynb
 notebooks/08_best_checkpoint_mlflow_review.ipynb
@@ -48,15 +49,25 @@ Completed after the original roadmap:
   - `temporal_alert_224_pretrained_best`
 - New review notebook:
   `notebooks/08_best_checkpoint_mlflow_review.ipynb`.
+- Simple temporal aggregation threshold sweeps:
+  - moving average 3s;
+  - moving average 5s;
+  - rolling max 3s;
+  - 2 consecutive frames above threshold;
+  - moving average 3s plus 2 consecutive frames.
 
 Key result:
 
-The pretrained best checkpoint reached recall `0.80` at threshold `0.22` on the
+The pretrained best checkpoint reached recall `0.80` at threshold `0.23` on the
 validation split, with precision `0.667`, false alarm rate `0.400`, and mean
-alert error `-8.116 s`.
+alert error `-7.616 s`.
 
-The next modeling priorities are now imbalance handling and short-window
-temporal aggregation.
+After temporal aggregation, the strongest operating point is now the pretrained
+best checkpoint with a 2-consecutive-frame alert rule: threshold `0.13`, recall
+`0.80`, precision `0.727`, false alarm rate `0.300`, and mean alert error
+`-7.991 s`.
+
+The next modeling priority is now imbalance handling.
 
 ## Immediate Next Step
 
@@ -210,6 +221,14 @@ Problem:
 The current model classifies frames independently. This can produce noisy risk
 curves and unstable alerts.
 
+Status:
+
+Completed on 2026-07-07. See:
+
+```text
+reports/temporal_aggregation_experiment.md
+```
+
 Before implementing GRU/LSTM, test simple temporal post-processing:
 
 - moving average over 3 seconds;
@@ -230,10 +249,10 @@ Why this matters:
 Simple temporal aggregation may reduce false positives and make alert timing more
 stable without adding a new neural architecture.
 
-Decision criterion:
+Result:
 
-If temporal aggregation improves alert precision and false alarm rate at the same
-recall, document it as a stronger baseline.
+The 2-consecutive-frame rule improved precision from `0.667` to `0.727` and
+reduced false alarm rate from `0.400` to `0.300` while preserving recall `0.80`.
 
 ## Priority 4 - CNN + GRU/LSTM
 
@@ -331,11 +350,10 @@ reliable early collision anticipation.
 ## Recommended Order of Work
 
 1. Test imbalance handling.
-2. Test short-window temporal aggregation.
-3. Update notebook and reports from MLflow as new experiments land.
-4. Build a useful Streamlit dashboard.
-5. Start writing the paper draft.
-6. Implement CNN + GRU/LSTM.
+2. Update notebook and reports from MLflow as new experiments land.
+3. Build a useful Streamlit dashboard.
+4. Start writing the paper draft.
+5. Implement CNN + GRU/LSTM.
 
 ## Resume Here Next Time
 

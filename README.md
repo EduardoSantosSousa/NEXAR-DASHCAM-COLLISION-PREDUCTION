@@ -94,6 +94,7 @@ Best-checkpoint follow-up:
 
 ```text
 reports/best_checkpoint_experiment.md
+reports/temporal_aggregation_experiment.md
 notebooks/08_best_checkpoint_mlflow_review.ipynb
 ```
 
