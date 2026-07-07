@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+.env
+
+# Data
+data/raw/*
+data/interim/*
+data/processed/*
+data/external/*
+*.mp4
+*.avi
+*.mov
+*.zip
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+
+# Models
+models/checkpoints/*
+*.pt
+*.pth
+*.ckpt
+*.onnx
+!models/checkpoints/.gitkeep
+!models/reports/.gitkeep
+
+# Outputs
+outputs/predictions/*
+outputs/submissions/*
+outputs/figures/*.png
+!outputs/figures/.gitkeep
+!outputs/predictions/.gitkeep
+!outputs/submissions/.gitkeep
+
+# System
+.DS_Store
+Thumbs.db
+.matplotlib/
+
+# Experiment tracking
+mlruns/
+mlartifacts/
+mlflow.db

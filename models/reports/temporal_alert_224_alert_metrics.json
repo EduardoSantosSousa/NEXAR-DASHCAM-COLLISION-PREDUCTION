@@ -1,0 +1,34 @@
+{
+  "config": {
+    "sample_csv": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\data\\interim\\sample_100_videos.csv",
+    "checkpoint_path": "models\\checkpoints\\temporal_alert_224_resnet18.pt",
+    "risk_scores_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_temporal_risk_scores.csv",
+    "alert_predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_alert_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\temporal_alert_224_alert_metrics.json",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "fps": "1.0",
+    "threshold": "0.5",
+    "batch_size": "32",
+    "device": "auto",
+    "max_videos": "None"
+  },
+  "device": "cuda",
+  "cuda_available": true,
+  "metrics": {
+    "videos": 100,
+    "positive_videos": 50,
+    "negative_videos": 50,
+    "predicted_alerts": 79,
+    "true_positive_alerts": 48,
+    "false_positive_alerts": 31,
+    "missed_events": 2,
+    "alert_precision": 0.6075949367088608,
+    "alert_recall": 0.96,
+    "false_alarm_rate": 0.62,
+    "missed_event_rate": 0.04,
+    "mean_predicted_lead_time": 14.689979166666665,
+    "median_predicted_lead_time": 16.369500000000002,
+    "mean_alert_time_error": -13.150416666666667,
+    "median_alert_time_error": -14.996
+  }
+}

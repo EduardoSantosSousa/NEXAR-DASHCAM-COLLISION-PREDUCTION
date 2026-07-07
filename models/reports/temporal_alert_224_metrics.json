@@ -1,0 +1,81 @@
+{
+  "config": {
+    "manifest_path": "data\\interim\\temporal_frames_224_manifest.csv",
+    "predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_frame_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\temporal_alert_224_metrics.json",
+    "checkpoint_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\checkpoints\\temporal_alert_224_resnet18.pt",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "batch_size": "64",
+    "epochs": "3",
+    "learning_rate": "0.0001",
+    "val_size": "0.2",
+    "random_state": "42",
+    "num_workers": "2",
+    "pretrained": "False",
+    "device": "auto"
+  },
+  "device": "cuda",
+  "cuda_available": true,
+  "train_frames": 6209,
+  "val_frames": 1551,
+  "train_videos": 80,
+  "val_videos": 20,
+  "train_target_distribution": {
+    "0": 5846,
+    "1": 363
+  },
+  "val_target_distribution": {
+    "0": 1449,
+    "1": 102
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.6405622734099018,
+      "accuracy": 0.8104448742746615,
+      "precision": 0.05555555555555555,
+      "recall": 0.11764705882352941,
+      "f1": 0.07547169811320754,
+      "roc_auc": 0.5217526624176241
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.5274268820577738,
+      "accuracy": 0.6421663442940039,
+      "precision": 0.08440366972477065,
+      "recall": 0.45098039215686275,
+      "f1": 0.14219474497681608,
+      "roc_auc": 0.5606300491210977
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.39188679079620203,
+      "accuracy": 0.6847195357833655,
+      "precision": 0.0784313725490196,
+      "recall": 0.35294117647058826,
+      "f1": 0.12834224598930483,
+      "roc_auc": 0.5175645137281967
+    }
+  ],
+  "frame_metrics": {
+    "accuracy": 0.6847195357833655,
+    "precision": 0.0784313725490196,
+    "recall": 0.35294117647058826,
+    "f1": 0.12834224598930483,
+    "roc_auc": 0.5175645137281967
+  },
+  "video_metrics_mean": {
+    "accuracy": 0.65,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "roc_auc": null
+  },
+  "video_metrics_max": {
+    "accuracy": 0.2,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "roc_auc": null
+  }
+}

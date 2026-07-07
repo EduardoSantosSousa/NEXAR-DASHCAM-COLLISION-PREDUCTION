@@ -1,0 +1,73 @@
+{
+  "config": {
+    "manifest_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\data\\interim\\sample_frames_manifest.csv",
+    "predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\baseline_frame_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\baseline_metrics.json",
+    "checkpoint_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\checkpoints\\baseline_resnet18.pt",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "batch_size": "16",
+    "epochs": "3",
+    "learning_rate": "0.0001",
+    "val_size": "0.2",
+    "random_state": "42",
+    "num_workers": "0",
+    "pretrained": "False",
+    "device": "auto"
+  },
+  "device": "cuda",
+  "cuda_available": true,
+  "train_frames": 400,
+  "val_frames": 100,
+  "train_videos": 80,
+  "val_videos": 20,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.6494332861900329,
+      "accuracy": 0.43,
+      "precision": 0.18181818181818182,
+      "recall": 0.04,
+      "f1": 0.06557377049180328,
+      "roc_auc": 0.4424
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.4872567510604858,
+      "accuracy": 0.38,
+      "precision": 0.2,
+      "recall": 0.08,
+      "f1": 0.11428571428571428,
+      "roc_auc": 0.5124
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.35588487684726716,
+      "accuracy": 0.55,
+      "precision": 0.5384615384615384,
+      "recall": 0.7,
+      "f1": 0.6086956521739131,
+      "roc_auc": 0.5604
+    }
+  ],
+  "frame_metrics": {
+    "accuracy": 0.55,
+    "precision": 0.5384615384615384,
+    "recall": 0.7,
+    "f1": 0.6086956521739131,
+    "roc_auc": 0.5604
+  },
+  "video_metrics_mean": {
+    "accuracy": 0.55,
+    "precision": 0.5384615384615384,
+    "recall": 0.7,
+    "f1": 0.6086956521739131,
+    "roc_auc": 0.62
+  },
+  "video_metrics_max": {
+    "accuracy": 0.45,
+    "precision": 0.4666666666666667,
+    "recall": 0.7,
+    "f1": 0.56,
+    "roc_auc": 0.5299999999999999
+  }
+}

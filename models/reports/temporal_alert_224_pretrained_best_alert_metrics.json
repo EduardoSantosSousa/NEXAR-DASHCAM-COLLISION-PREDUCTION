@@ -1,0 +1,40 @@
+{
+  "config": {
+    "sample_csv": "data\\interim\\sample_100_videos_splits.csv",
+    "checkpoint_path": "models\\checkpoints\\temporal_alert_224_pretrained_best_resnet18.pt",
+    "risk_scores_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_pretrained_best_temporal_risk_scores.csv",
+    "alert_predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_pretrained_best_alert_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\temporal_alert_224_pretrained_best_alert_metrics.json",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "split": "val",
+    "split_column": "split",
+    "fps": "1.0",
+    "threshold": "0.5",
+    "batch_size": "32",
+    "device": "auto",
+    "max_videos": "None",
+    "mlflow_enabled": "True",
+    "mlflow_experiment_name": "nexar-collision-prediction",
+    "mlflow_run_name": "None",
+    "mlflow_tracking_uri": "None"
+  },
+  "device": "cuda",
+  "cuda_available": true,
+  "metrics": {
+    "videos": 20,
+    "positive_videos": 10,
+    "negative_videos": 10,
+    "predicted_alerts": 7,
+    "true_positive_alerts": 3,
+    "false_positive_alerts": 3,
+    "missed_events": 7,
+    "alert_precision": 0.5,
+    "alert_recall": 0.3,
+    "false_alarm_rate": 0.3,
+    "missed_event_rate": 0.7,
+    "mean_predicted_lead_time": 13.748,
+    "median_predicted_lead_time": 11.567,
+    "mean_alert_time_error": -11.793666666666667,
+    "median_alert_time_error": -11.033000000000001
+  }
+}
