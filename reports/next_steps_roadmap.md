@@ -30,6 +30,7 @@ data/interim/temporal_frames_224_manifest.csv
 reports/experiment_comparison_val.md
 reports/best_checkpoint_experiment.md
 reports/temporal_aggregation_experiment.md
+reports/cnn_rnn_sequence_experiment.md
 reports/mlflow_tracking.md
 notebooks/07_validation_experiment_analysis.ipynb
 notebooks/08_best_checkpoint_mlflow_review.ipynb
@@ -68,6 +69,15 @@ best checkpoint with a 2-consecutive-frame alert rule: threshold `0.13`, recall
 `-7.991 s`.
 
 The next modeling priority is now imbalance handling.
+
+Additional sequence-model progress:
+
+- Implemented CNN + GRU/LSTM sequence training and evaluation.
+- Ran first frozen-encoder sequence experiments:
+  - `temporal_alert_224_pretrained_gru_seq4`
+  - `temporal_alert_224_pretrained_lstm_seq4`
+- The sequence pipeline works end to end, but does not yet beat the current best
+  baseline.
 
 ## Immediate Next Step
 
@@ -262,6 +272,18 @@ Only start this after:
 - imbalance experiments are logged in MLflow;
 - short-window temporal aggregation is tested.
 
+Status:
+
+Started on 2026-07-07. See:
+
+```text
+reports/cnn_rnn_sequence_experiment.md
+```
+
+The first frozen-encoder GRU/LSTM experiments are complete. They validate the
+sequence pipeline but do not yet outperform the ResNet18 best-checkpoint model
+with the 2-consecutive-frame rule.
+
 Proposed architecture:
 
 ```text
@@ -349,11 +371,11 @@ reliable early collision anticipation.
 
 ## Recommended Order of Work
 
-1. Test imbalance handling.
-2. Update notebook and reports from MLflow as new experiments land.
-3. Build a useful Streamlit dashboard.
-4. Start writing the paper draft.
-5. Implement CNN + GRU/LSTM.
+1. Test imbalance handling for the sequence model.
+2. Try GRU sequence length 8 with partial CNN fine-tuning.
+3. Update notebook and reports from MLflow as new experiments land.
+4. Build a useful Streamlit dashboard.
+5. Start writing the paper draft.
 
 ## Resume Here Next Time
 
