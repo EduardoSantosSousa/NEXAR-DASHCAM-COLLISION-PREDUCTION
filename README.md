@@ -93,6 +93,7 @@ reports/next_steps_roadmap.md
 Best-checkpoint follow-up:
 
 ```text
+reports/metodologia_resultados_proximos_passos.md
 reports/best_checkpoint_experiment.md
 reports/temporal_aggregation_experiment.md
 reports/cnn_rnn_sequence_experiment.md
