@@ -18,6 +18,15 @@ from nexar_collision.evaluation.evaluate_sequence import (
 from nexar_collision.tracking.mlflow_utils import DEFAULT_EXPERIMENT_NAME
 
 
+def parse_int_list(value: str | None) -> tuple[int, ...] | None:
+    if value is None:
+        return None
+    tokens = [token.strip() for token in value.split(",") if token.strip()]
+    if not tokens:
+        return None
+    return tuple(int(token) for token in tokens)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Evaluate temporal alerts from a CNN + GRU/LSTM sequence model."
@@ -46,6 +55,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--split", default="val")
     parser.add_argument("--split-column", default="split")
     parser.add_argument("--sequence-length", type=int, default=None)
+    parser.add_argument(
+        "--alert-class-indices",
+        default=None,
+        help="Optional comma-separated class indices used as alert risk.",
+    )
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--device", default="auto")
@@ -79,6 +93,7 @@ def main() -> None:
             split=args.split,
             split_column=args.split_column,
             sequence_length=args.sequence_length,
+            alert_class_indices=parse_int_list(args.alert_class_indices),
             threshold=args.threshold,
             batch_size=args.batch_size,
             device=args.device,

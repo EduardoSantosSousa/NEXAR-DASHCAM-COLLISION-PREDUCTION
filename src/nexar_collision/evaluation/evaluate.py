@@ -43,6 +43,7 @@ class AlertEvaluationConfig:
     fps: float = 1.0
     threshold: float = 0.5
     batch_size: int = 32
+    backbone: str | None = None
     device: str = "auto"
     max_videos: int | None = None
     mlflow_enabled: bool = True
@@ -154,6 +155,37 @@ def first_alert_time(video_scores: pd.DataFrame, threshold: float) -> float | No
     return float(alerts.sort_values("timestamp").iloc[0]["timestamp"])
 
 
+def load_baseline_checkpoint(
+    checkpoint_path: Path,
+    device: torch.device,
+    backbone_override: str | None = None,
+) -> tuple[torch.nn.Module, dict[str, object]]:
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+
+    if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
+        model_config = dict(checkpoint.get("model_config", {}))
+        state_dict = checkpoint["model_state_dict"]
+    else:
+        # Backward compatibility with older ResNet18 checkpoints saved as raw
+        # state_dict objects.
+        model_config = {}
+        state_dict = checkpoint
+
+    if backbone_override is not None:
+        model_config["backbone"] = backbone_override
+    model_config.setdefault("backbone", "resnet18")
+    model_config.setdefault("num_classes", 2)
+
+    model = build_baseline_cnn(
+        backbone=str(model_config["backbone"]),
+        num_classes=int(model_config["num_classes"]),
+        pretrained=False,
+    ).to(device)
+    model.load_state_dict(state_dict)
+    model.eval()
+    return model, model_config
+
+
 def compute_alert_metrics(alert_df: pd.DataFrame) -> dict[str, float | int | None]:
     positives = alert_df[alert_df["target"] == 1].copy()
     negatives = alert_df[alert_df["target"] == 0].copy()
@@ -246,10 +278,11 @@ def evaluate_alerts(config: AlertEvaluationConfig | None = None) -> dict[str, ob
 
     sample_df = load_sample_df(config)
 
-    model = build_baseline_cnn(pretrained=False).to(device)
-    state_dict = torch.load(config.checkpoint_path, map_location=device)
-    model.load_state_dict(state_dict)
-    model.eval()
+    model, model_config = load_baseline_checkpoint(
+        checkpoint_path=config.checkpoint_path,
+        device=device,
+        backbone_override=config.backbone,
+    )
 
     risk_records: list[dict[str, object]] = []
     alert_records: list[dict[str, object]] = []
@@ -329,6 +362,7 @@ def evaluate_alerts(config: AlertEvaluationConfig | None = None) -> dict[str, ob
 
     report = {
         "config": {key: str(value) for key, value in asdict(config).items()},
+        "model_config": model_config,
         "device": str(device),
         "cuda_available": torch.cuda.is_available(),
         "metrics": metrics,
@@ -354,7 +388,7 @@ def log_alert_evaluation_run_to_mlflow(
     run_name = config.mlflow_run_name or f"{figure_prefix}_alert_eval"
     tags = {
         "stage": "alert_evaluation",
-        "model_family": "resnet18",
+        "model_family": str(report.get("model_config", {}).get("backbone", "resnet18")),
         "experiment_name": figure_prefix,
     }
     risk_curve_paths = sorted(
@@ -379,6 +413,7 @@ def log_alert_evaluation_run_to_mlflow(
                 "fps": config.fps,
                 "threshold": config.threshold,
                 "batch_size": config.batch_size,
+                "backbone": report.get("model_config", {}).get("backbone", "resnet18"),
                 "device": config.device,
                 "max_videos": config.max_videos,
             },

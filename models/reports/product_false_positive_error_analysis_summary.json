@@ -1,0 +1,12 @@
+{
+  "experiment_name": "product_event_window_phase_classifier_seq8",
+  "threshold": 0.64,
+  "negative_videos": 112,
+  "negative_videos_with_false_alert": 50,
+  "false_alert_video_rate": 0.44642857142857145,
+  "output_csv": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\product_false_positive_error_analysis.csv",
+  "review_csv": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\product_false_positive_manual_review.csv",
+  "positive_reference_csv": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\product_positive_reference_analysis.csv",
+  "report": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\reports\\product_false_positive_error_analysis.md",
+  "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures\\product_false_positive_error_analysis"
+}

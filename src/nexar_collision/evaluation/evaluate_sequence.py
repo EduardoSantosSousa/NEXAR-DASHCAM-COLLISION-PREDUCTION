@@ -10,9 +10,9 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 
-from nexar_collision.data.dataset import FrameSequenceCollisionDataset
 from nexar_collision.evaluation.evaluate import compute_alert_metrics, plot_risk_curves
 from nexar_collision.models.temporal_model import build_temporal_model
+from nexar_collision.models.train_sequence import build_sequence_dataset
 from nexar_collision.models.train import build_transforms, load_manifest_with_optional_split, resolve_device
 from nexar_collision.tracking.mlflow_utils import (
     DEFAULT_EXPERIMENT_NAME,
@@ -39,6 +39,7 @@ class SequenceAlertEvaluationConfig:
     split: str | None = "val"
     split_column: str = "split"
     sequence_length: int | None = None
+    alert_class_indices: tuple[int, ...] | None = None
     batch_size: int = 8
     threshold: float = 0.5
     device: str = "auto"
@@ -51,7 +52,7 @@ class SequenceAlertEvaluationConfig:
 def load_sequence_checkpoint(
     checkpoint_path: Path,
     device: torch.device,
-) -> tuple[torch.nn.Module, int, dict[str, object]]:
+) -> tuple[torch.nn.Module, int, dict[str, object], tuple[int, ...]]:
     checkpoint = torch.load(checkpoint_path, map_location=device)
     if not isinstance(checkpoint, dict) or "model_state_dict" not in checkpoint:
         raise ValueError(
@@ -60,10 +61,14 @@ def load_sequence_checkpoint(
 
     model_config = checkpoint.get("model_config", {})
     sequence_length = int(checkpoint.get("sequence_length", 4))
+    alert_class_indices = checkpoint.get("alert_class_indices")
+    if alert_class_indices is None:
+        num_classes = int(model_config.get("num_classes", 2))
+        alert_class_indices = [1] if num_classes == 2 else list(range(1, num_classes))
     model = build_temporal_model(**model_config).to(device)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
-    return model, sequence_length, model_config
+    return model, sequence_length, model_config, tuple(int(index) for index in alert_class_indices)
 
 
 def load_eval_manifest(config: SequenceAlertEvaluationConfig) -> pd.DataFrame:
@@ -85,25 +90,28 @@ def score_sequences(
     model: torch.nn.Module,
     loader: DataLoader,
     device: torch.device,
+    alert_class_indices: tuple[int, ...],
 ) -> pd.DataFrame:
     records = []
     model.eval()
     for batch in loader:
         images = batch["images"].to(device)
         logits = model(images)
-        scores = torch.softmax(logits, dim=1)[:, 1].cpu().numpy()
+        probabilities = torch.softmax(logits, dim=1).cpu()
+        scores = probabilities[:, list(alert_class_indices)].sum(dim=1).numpy()
 
         for index, score in enumerate(scores):
-            records.append(
-                {
-                    "id": batch["video_id"][index],
-                    "target": int(batch["video_target"][index]),
-                    "frame_target": int(batch["target"][index]),
-                    "timestamp": float(batch["timestamp"][index]),
-                    "duration": float(batch["duration"][index]),
-                    "risk_score": float(score),
-                }
-            )
+            record = {
+                "id": batch["video_id"][index],
+                "target": int(batch["video_target"][index]),
+                "frame_target": int(batch["target"][index]),
+                "timestamp": float(batch["timestamp"][index]),
+                "duration": float(batch["duration"][index]),
+                "risk_score": float(score),
+            }
+            for class_index, probability in enumerate(probabilities[index].tolist()):
+                record[f"prob_class_{class_index}"] = float(probability)
+            records.append(record)
     return pd.DataFrame(records)
 
 
@@ -166,15 +174,16 @@ def evaluate_sequence_alerts(
 ) -> dict[str, object]:
     config = config or SequenceAlertEvaluationConfig()
     device = resolve_device(config.device)
-    model, checkpoint_sequence_length, model_config = load_sequence_checkpoint(
+    model, checkpoint_sequence_length, model_config, checkpoint_alert_class_indices = load_sequence_checkpoint(
         config.checkpoint_path,
         device,
     )
     sequence_length = config.sequence_length or checkpoint_sequence_length
+    alert_class_indices = config.alert_class_indices or checkpoint_alert_class_indices
     _, eval_transform = build_transforms()
 
     manifest_df = load_eval_manifest(config)
-    dataset = FrameSequenceCollisionDataset(
+    dataset = build_sequence_dataset(
         manifest_df,
         sequence_length=sequence_length,
         transform=eval_transform,
@@ -187,7 +196,7 @@ def evaluate_sequence_alerts(
         num_workers=0,
     )
 
-    risk_scores_df = score_sequences(model, loader, device)
+    risk_scores_df = score_sequences(model, loader, device, alert_class_indices)
     sample_df = pd.read_csv(config.sample_csv, dtype={"id": str})
     if config.split is not None:
         sample_df = sample_df[sample_df[config.split_column] == config.split].copy()
@@ -214,6 +223,7 @@ def evaluate_sequence_alerts(
         "config": {key: str(value) for key, value in asdict(config).items()},
         "model_config": model_config,
         "sequence_length": sequence_length,
+        "alert_class_indices": list(alert_class_indices),
         "device": str(device),
         "cuda_available": torch.cuda.is_available(),
         "metrics": metrics,

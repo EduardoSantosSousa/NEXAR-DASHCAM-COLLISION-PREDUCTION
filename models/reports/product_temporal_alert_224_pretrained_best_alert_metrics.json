@@ -1,0 +1,40 @@
+{
+  "config": {
+    "sample_csv": "data\\interim\\full_train_product_splits.csv",
+    "checkpoint_path": "models\\checkpoints\\product_temporal_alert_224_pretrained_best_resnet18.pt",
+    "risk_scores_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\product_temporal_alert_224_pretrained_best_temporal_risk_scores.csv",
+    "alert_predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\product_temporal_alert_224_pretrained_best_alert_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\product_temporal_alert_224_pretrained_best_alert_metrics.json",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "split": "val",
+    "split_column": "split",
+    "fps": "1.0",
+    "threshold": "0.5",
+    "batch_size": "32",
+    "device": "auto",
+    "max_videos": "None",
+    "mlflow_enabled": "True",
+    "mlflow_experiment_name": "nexar-collision-prediction",
+    "mlflow_run_name": "None",
+    "mlflow_tracking_uri": "None"
+  },
+  "device": "cuda",
+  "cuda_available": true,
+  "metrics": {
+    "videos": 224,
+    "positive_videos": 112,
+    "negative_videos": 112,
+    "predicted_alerts": 196,
+    "true_positive_alerts": 99,
+    "false_positive_alerts": 90,
+    "missed_events": 13,
+    "alert_precision": 0.5238095238095238,
+    "alert_recall": 0.8839285714285714,
+    "false_alarm_rate": 0.8035714285714286,
+    "missed_event_rate": 0.11607142857142858,
+    "mean_predicted_lead_time": 15.459464646464648,
+    "median_predicted_lead_time": 18.667,
+    "mean_alert_time_error": -13.737757575757575,
+    "median_alert_time_error": -16.496
+  }
+}

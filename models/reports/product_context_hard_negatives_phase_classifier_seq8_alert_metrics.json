@@ -1,0 +1,58 @@
+{
+  "config": {
+    "manifest_path": "data\\interim\\product_temporal_frames_224_manifest.csv",
+    "sample_csv": "data\\interim\\full_train_product_splits.csv",
+    "split_manifest_path": "data\\interim\\full_train_product_splits.csv",
+    "checkpoint_path": "models\\checkpoints\\product_context_hard_negatives_phase_classifier_seq8_best_sequence.pt",
+    "risk_scores_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\product_context_hard_negatives_phase_classifier_seq8_temporal_risk_scores.csv",
+    "alert_predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\product_context_hard_negatives_phase_classifier_seq8_alert_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\product_context_hard_negatives_phase_classifier_seq8_alert_metrics.json",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "split": "val",
+    "split_column": "split",
+    "sequence_length": "8",
+    "alert_class_indices": "(2, 3)",
+    "batch_size": "16",
+    "threshold": "0.5",
+    "device": "auto",
+    "mlflow_enabled": "True",
+    "mlflow_experiment_name": "nexar-collision-prediction",
+    "mlflow_run_name": "None",
+    "mlflow_tracking_uri": "None"
+  },
+  "model_config": {
+    "num_classes": 4,
+    "cnn_backbone": "resnet18",
+    "pretrained": true,
+    "rnn_type": "gru",
+    "hidden_size": 128,
+    "num_layers": 1,
+    "dropout": 0.2,
+    "bidirectional": false,
+    "cnn_train_policy": "frozen"
+  },
+  "sequence_length": 8,
+  "alert_class_indices": [
+    2,
+    3
+  ],
+  "device": "cuda",
+  "cuda_available": true,
+  "metrics": {
+    "videos": 224,
+    "positive_videos": 112,
+    "negative_videos": 112,
+    "predicted_alerts": 181,
+    "true_positive_alerts": 91,
+    "false_positive_alerts": 83,
+    "missed_events": 21,
+    "alert_precision": 0.5229885057471264,
+    "alert_recall": 0.8125,
+    "false_alarm_rate": 0.7410714285714286,
+    "missed_event_rate": 0.1875,
+    "mean_predicted_lead_time": 16.41153846153846,
+    "median_predicted_lead_time": 19.25,
+    "mean_alert_time_error": -14.68854945054945,
+    "median_alert_time_error": -17.281
+  }
+}

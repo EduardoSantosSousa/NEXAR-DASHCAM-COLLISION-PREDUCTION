@@ -12,6 +12,7 @@ os.environ.setdefault("MPLCONFIGDIR", str(PROJECT_ROOT / ".matplotlib"))
 sys.path.insert(0, str(SRC_DIR))
 
 from nexar_collision.evaluation.evaluate import AlertEvaluationConfig, evaluate_alerts
+from nexar_collision.models.baseline_cnn import SUPPORTED_BASELINE_BACKBONES
 from nexar_collision.tracking.mlflow_utils import DEFAULT_EXPERIMENT_NAME
 
 
@@ -22,6 +23,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fps", type=float, default=1.0)
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument(
+        "--backbone",
+        choices=SUPPORTED_BASELINE_BACKBONES,
+        default=None,
+        help="Optional override for legacy checkpoints without model metadata.",
+    )
     parser.add_argument("--device", default="auto")
     parser.add_argument("--max-videos", type=int, default=None)
     parser.add_argument(
@@ -67,6 +74,7 @@ def main() -> None:
             fps=args.fps,
             threshold=args.threshold,
             batch_size=args.batch_size,
+            backbone=args.backbone,
             device=args.device,
             max_videos=args.max_videos,
             mlflow_enabled=not args.no_mlflow,

@@ -1,0 +1,46 @@
+{
+  "config": {
+    "sample_csv": "data\\interim\\full_train_product_splits.csv",
+    "checkpoint_path": "models\\checkpoints\\product_temporal_alert_224_efficientnet_b0_frozen_amp_best_efficientnet_b0.pt",
+    "risk_scores_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\product_temporal_alert_224_efficientnet_b0_frozen_amp_best_temporal_risk_scores.csv",
+    "alert_predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\product_temporal_alert_224_efficientnet_b0_frozen_amp_best_alert_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\product_temporal_alert_224_efficientnet_b0_frozen_amp_best_alert_metrics.json",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "split": "val",
+    "split_column": "split",
+    "fps": "1.0",
+    "threshold": "0.5",
+    "batch_size": "64",
+    "backbone": "None",
+    "device": "auto",
+    "max_videos": "None",
+    "mlflow_enabled": "True",
+    "mlflow_experiment_name": "nexar-collision-prediction",
+    "mlflow_run_name": "None",
+    "mlflow_tracking_uri": "None"
+  },
+  "model_config": {
+    "backbone": "efficientnet_b0",
+    "num_classes": 2,
+    "pretrained": true
+  },
+  "device": "cuda",
+  "cuda_available": true,
+  "metrics": {
+    "videos": 224,
+    "positive_videos": 112,
+    "negative_videos": 112,
+    "predicted_alerts": 207,
+    "true_positive_alerts": 105,
+    "false_positive_alerts": 97,
+    "missed_events": 7,
+    "alert_precision": 0.5198019801980198,
+    "alert_recall": 0.9375,
+    "false_alarm_rate": 0.8660714285714286,
+    "missed_event_rate": 0.0625,
+    "mean_predicted_lead_time": 17.13849523809524,
+    "median_predicted_lead_time": 19.15,
+    "mean_alert_time_error": -15.438895238095236,
+    "median_alert_time_error": -17.167
+  }
+}

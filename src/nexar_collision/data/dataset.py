@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -93,6 +94,11 @@ class FrameSequenceCollisionDataset(Dataset):
 
         video_target = int(end_row["video_target"]) if "video_target" in end_row else int(end_row["target"])
         duration = float(end_row["duration"]) if "duration" in end_row else 0.0
+        sample_weight = (
+            float(end_row["sample_weight"])
+            if "sample_weight" in end_row and pd.notna(end_row["sample_weight"])
+            else 1.0
+        )
 
         return {
             "images": torch.stack(images),
@@ -101,4 +107,70 @@ class FrameSequenceCollisionDataset(Dataset):
             "video_id": end_row["id"],
             "timestamp": float(end_row["timestamp"]),
             "duration": duration,
+            "sample_weight": sample_weight,
+        }
+
+
+class ExplicitFrameWindowSequenceDataset(Dataset):
+    """Sequence dataset backed by one manifest row per explicit frame window."""
+
+    def __init__(self, manifest: pd.DataFrame, transform=None):
+        required_columns = {"id", "target", "frame_paths", "timestamp"}
+        missing_columns = required_columns - set(manifest.columns)
+        if missing_columns:
+            raise ValueError(
+                "Missing required columns for explicit sequence windows: "
+                f"{sorted(missing_columns)}"
+            )
+
+        self.manifest = manifest.reset_index(drop=True).copy()
+        self.transform = transform
+        self.sequence_targets = [int(value) for value in self.manifest["target"]]
+
+    def __len__(self) -> int:
+        return len(self.manifest)
+
+    @staticmethod
+    def _loads_list(value) -> list:
+        if isinstance(value, list):
+            return value
+        return json.loads(str(value))
+
+    def __getitem__(self, index: int):
+        row = self.manifest.iloc[index]
+        frame_paths = self._loads_list(row["frame_paths"])
+
+        images = []
+        for frame_path in frame_paths:
+            image = Image.open(Path(frame_path)).convert("RGB")
+            if self.transform is not None:
+                image = self.transform(image)
+            images.append(image)
+
+        video_target = (
+            int(row["video_target"])
+            if "video_target" in row and pd.notna(row["video_target"])
+            else int(row["target"])
+        )
+        duration = (
+            float(row["duration"])
+            if "duration" in row and pd.notna(row["duration"])
+            else 0.0
+        )
+        sample_weight = (
+            float(row["sample_weight"])
+            if "sample_weight" in row and pd.notna(row["sample_weight"])
+            else 1.0
+        )
+
+        return {
+            "images": torch.stack(images),
+            "target": int(row["target"]),
+            "video_target": video_target,
+            "video_id": row["id"],
+            "window_id": row["window_id"] if "window_id" in row else f"{row['id']}_{index}",
+            "window_type": row["window_type"] if "window_type" in row else "explicit_window",
+            "timestamp": float(row["timestamp"]),
+            "duration": duration,
+            "sample_weight": sample_weight,
         }

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import random
+from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -21,7 +22,10 @@ from torchvision import transforms
 
 from nexar_collision.data.dataset import FrameCollisionDataset
 from nexar_collision.evaluation.metrics import compute_metrics
-from nexar_collision.models.baseline_cnn import build_baseline_cnn
+from nexar_collision.models.baseline_cnn import (
+    build_baseline_cnn,
+    configure_trainable_baseline_layers,
+)
 from nexar_collision.tracking.mlflow_utils import (
     DEFAULT_EXPERIMENT_NAME,
     log_artifacts,
@@ -53,7 +57,12 @@ class TrainingConfig:
     val_size: float = 0.2
     random_state: int = 42
     num_workers: int = 0
+    backbone: str = "resnet18"
     pretrained: bool = False
+    freeze_backbone: bool = False
+    unfreeze_last_n_blocks: int = 0
+    amp: bool = False
+    log_every_n_batches: int = 0
     device: str = "auto"
     monitor_metric: str = "roc_auc"
     monitor_mode: str = "max"
@@ -79,6 +88,16 @@ def seed_everything(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
+def should_use_amp(device: torch.device, requested: bool) -> bool:
+    return requested and device.type == "cuda"
+
+
+def autocast_context(device: torch.device, enabled: bool):
+    if enabled and device.type == "cuda":
+        return torch.autocast(device_type="cuda", dtype=torch.float16)
+    return nullcontext()
+
+
 def default_best_checkpoint_path(checkpoint_path: Path) -> Path:
     """Return a sibling checkpoint path for the best monitored epoch."""
     if checkpoint_path.name.endswith("_resnet18.pt"):
@@ -86,6 +105,34 @@ def default_best_checkpoint_path(checkpoint_path: Path) -> Path:
     else:
         name = f"{checkpoint_path.stem}_best{checkpoint_path.suffix}"
     return checkpoint_path.with_name(name)
+
+
+def model_config_from_training_config(config: TrainingConfig) -> dict[str, object]:
+    return {
+        "backbone": config.backbone,
+        "num_classes": 2,
+        "pretrained": config.pretrained,
+    }
+
+
+def save_baseline_checkpoint(
+    model: nn.Module,
+    path: Path,
+    config: TrainingConfig,
+    epoch: int,
+    monitor_value: float | None,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "model_state_dict": model.state_dict(),
+            "model_config": model_config_from_training_config(config),
+            "epoch": epoch,
+            "monitor_metric": config.monitor_metric,
+            "monitor_value": monitor_value,
+        },
+        path,
+    )
 
 
 def monitor_value_from_metrics(
@@ -129,6 +176,15 @@ def load_manifest_with_optional_split(config: TrainingConfig) -> pd.DataFrame:
 
     if config.split_manifest_path is None:
         return manifest_df
+
+    if (
+        config.split_column in manifest_df.columns
+        and manifest_df[config.split_column].notna().all()
+    ):
+        return manifest_df
+
+    if config.split_column in manifest_df.columns:
+        manifest_df = manifest_df.drop(columns=[config.split_column])
 
     split_df = pd.read_csv(config.split_manifest_path, dtype={"id": str})
     required_columns = {"id", config.split_column}
@@ -219,20 +275,40 @@ def train_one_epoch(
     optimizer: torch.optim.Optimizer,
     criterion: nn.Module,
     device: torch.device,
+    amp_enabled: bool = False,
+    scaler=None,
+    epoch: int | None = None,
+    log_every_n_batches: int = 0,
 ) -> float:
     model.train()
     losses = []
 
-    for batch in loader:
+    for batch_idx, batch in enumerate(loader, start=1):
         images = batch["image"].to(device)
         targets = batch["target"].to(device)
 
         optimizer.zero_grad(set_to_none=True)
-        logits = model(images)
-        loss = criterion(logits, targets)
-        loss.backward()
-        optimizer.step()
+        with autocast_context(device, amp_enabled):
+            logits = model(images)
+            loss = criterion(logits, targets)
+
+        if amp_enabled and scaler is not None:
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            loss.backward()
+            optimizer.step()
+
         losses.append(loss.item())
+
+        if log_every_n_batches > 0 and batch_idx % log_every_n_batches == 0:
+            epoch_prefix = f"epoch={epoch} " if epoch is not None else ""
+            print(
+                f"{epoch_prefix}batch={batch_idx}/{len(loader)} "
+                f"train_loss_running={float(np.mean(losses)):.4f}",
+                flush=True,
+            )
 
     return float(np.mean(losses))
 
@@ -242,13 +318,15 @@ def predict(
     model: nn.Module,
     loader: DataLoader,
     device: torch.device,
+    amp_enabled: bool = False,
 ) -> pd.DataFrame:
     model.eval()
     records = []
 
     for batch in loader:
         images = batch["image"].to(device)
-        logits = model(images)
+        with autocast_context(device, amp_enabled):
+            logits = model(images)
         scores = torch.softmax(logits, dim=1)[:, 1].cpu().numpy()
         preds = (scores >= 0.5).astype(int)
 
@@ -347,17 +425,41 @@ def train_model(config: TrainingConfig | None = None) -> dict[str, object]:
         batch_size=config.batch_size,
         shuffle=True,
         num_workers=config.num_workers,
+        pin_memory=device.type == "cuda",
     )
     val_loader = DataLoader(
         FrameCollisionDataset(val_df, transform=eval_transform),
         batch_size=config.batch_size,
         shuffle=False,
         num_workers=config.num_workers,
+        pin_memory=device.type == "cuda",
     )
 
-    model = build_baseline_cnn(pretrained=config.pretrained).to(device)
+    model = build_baseline_cnn(
+        backbone=config.backbone,
+        pretrained=config.pretrained,
+    ).to(device)
+    configure_trainable_baseline_layers(
+        model=model,
+        backbone=config.backbone,
+        freeze_backbone=config.freeze_backbone,
+        unfreeze_last_n_blocks=config.unfreeze_last_n_blocks,
+    )
+
+    trainable_parameters = sum(
+        parameter.numel() for parameter in model.parameters() if parameter.requires_grad
+    )
+    total_parameters = sum(parameter.numel() for parameter in model.parameters())
+    if trainable_parameters == 0:
+        raise ValueError("No trainable parameters available for optimization.")
+
     criterion = build_class_weighted_loss(train_df, device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
+    optimizer = torch.optim.AdamW(
+        [parameter for parameter in model.parameters() if parameter.requires_grad],
+        lr=config.learning_rate,
+    )
+    amp_enabled = should_use_amp(device, config.amp)
+    scaler = torch.amp.GradScaler("cuda", enabled=amp_enabled)
 
     config.predictions_path.parent.mkdir(parents=True, exist_ok=True)
     config.metrics_path.parent.mkdir(parents=True, exist_ok=True)
@@ -373,8 +475,18 @@ def train_model(config: TrainingConfig | None = None) -> dict[str, object]:
     stopped_epoch: int | None = None
 
     for epoch in range(1, config.epochs + 1):
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
-        predictions_df = predict(model, val_loader, device)
+        train_loss = train_one_epoch(
+            model,
+            train_loader,
+            optimizer,
+            criterion,
+            device,
+            amp_enabled=amp_enabled,
+            scaler=scaler,
+            epoch=epoch,
+            log_every_n_batches=config.log_every_n_batches,
+        )
+        predictions_df = predict(model, val_loader, device, amp_enabled=amp_enabled)
         frame_metrics = compute_metrics(
             predictions_df["target"],
             predictions_df["prediction"],
@@ -396,7 +508,13 @@ def train_model(config: TrainingConfig | None = None) -> dict[str, object]:
             best_monitor_value = monitor_value
             best_frame_metrics = dict(frame_metrics)
             epochs_without_improvement = 0
-            torch.save(model.state_dict(), best_checkpoint_path)
+            save_baseline_checkpoint(
+                model=model,
+                path=best_checkpoint_path,
+                config=config,
+                epoch=epoch,
+                monitor_value=monitor_value,
+            )
         else:
             epochs_without_improvement += 1
 
@@ -414,7 +532,8 @@ def train_model(config: TrainingConfig | None = None) -> dict[str, object]:
         print(
             f"epoch={epoch} train_loss={train_loss:.4f} "
             f"val_f1={frame_metrics['f1']:.4f} "
-            f"val_{config.monitor_metric}={monitor_value:.4f}{best_marker}"
+            f"val_{config.monitor_metric}={monitor_value:.4f}{best_marker}",
+            flush=True,
         )
 
         if config.patience > 0 and epochs_without_improvement >= config.patience:
@@ -423,11 +542,12 @@ def train_model(config: TrainingConfig | None = None) -> dict[str, object]:
             print(
                 "early_stopping="
                 f"epoch={epoch} monitor={config.monitor_metric} "
-                f"best_epoch={best_epoch} best_value={best_monitor_value:.4f}"
+                f"best_epoch={best_epoch} best_value={best_monitor_value:.4f}",
+                flush=True,
             )
             break
 
-    predictions_df = predict(model, val_loader, device)
+    predictions_df = predict(model, val_loader, device, amp_enabled=amp_enabled)
     video_predictions_df = aggregate_video_predictions(predictions_df)
 
     frame_metrics = compute_metrics(
@@ -452,12 +572,24 @@ def train_model(config: TrainingConfig | None = None) -> dict[str, object]:
     )
     video_predictions_df.to_csv(video_predictions_path, index=False)
     save_figures(predictions_df, config.figures_dir, config.figure_prefix)
-    torch.save(model.state_dict(), config.checkpoint_path)
+    save_baseline_checkpoint(
+        model=model,
+        path=config.checkpoint_path,
+        config=config,
+        epoch=int(history[-1]["epoch"]),
+        monitor_value=float(history[-1]["monitor_value"]),
+    )
 
     report = {
         "config": {key: str(value) for key, value in asdict(config).items()},
+        "model_config": model_config_from_training_config(config),
         "device": str(device),
         "cuda_available": torch.cuda.is_available(),
+        "amp_enabled": amp_enabled,
+        "freeze_backbone": config.freeze_backbone,
+        "unfreeze_last_n_blocks": config.unfreeze_last_n_blocks,
+        "trainable_parameters": int(trainable_parameters),
+        "total_parameters": int(total_parameters),
         "train_frames": len(train_df),
         "val_frames": len(val_df),
         "train_videos": train_df["id"].nunique(),
@@ -503,7 +635,7 @@ def log_training_run_to_mlflow(
     run_name = config.mlflow_run_name or f"{config.figure_prefix}_train"
     tags = {
         "stage": "train",
-        "model_family": "resnet18",
+        "model_family": config.backbone,
         "experiment_name": config.figure_prefix,
     }
     figure_paths = [
@@ -533,7 +665,12 @@ def log_training_run_to_mlflow(
                 "val_size": config.val_size,
                 "random_state": config.random_state,
                 "num_workers": config.num_workers,
+                "backbone": config.backbone,
                 "pretrained": config.pretrained,
+                "freeze_backbone": config.freeze_backbone,
+                "unfreeze_last_n_blocks": config.unfreeze_last_n_blocks,
+                "amp_requested": config.amp,
+                "amp_enabled": report["amp_enabled"],
                 "device": config.device,
                 "monitor_metric": config.monitor_metric,
                 "monitor_mode": config.monitor_mode,
@@ -545,12 +682,14 @@ def log_training_run_to_mlflow(
         log_metrics(
             mlflow,
             {
-                "train_frames": report["train_frames"],
-                "val_frames": report["val_frames"],
-                "train_videos": report["train_videos"],
-                "val_videos": report["val_videos"],
-            },
-        )
+                    "train_frames": report["train_frames"],
+                    "val_frames": report["val_frames"],
+                    "train_videos": report["train_videos"],
+                    "val_videos": report["val_videos"],
+                    "trainable_parameters": report["trainable_parameters"],
+                    "total_parameters": report["total_parameters"],
+                },
+            )
         if report["best_epoch"] is not None:
             log_metrics(
                 mlflow,

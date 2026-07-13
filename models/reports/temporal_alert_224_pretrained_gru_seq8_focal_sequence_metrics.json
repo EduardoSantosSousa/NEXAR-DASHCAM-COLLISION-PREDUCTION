@@ -1,0 +1,141 @@
+{
+  "config": {
+    "manifest_path": "data\\interim\\temporal_frames_224_manifest.csv",
+    "predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_pretrained_gru_seq8_focal_sequence_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\temporal_alert_224_pretrained_gru_seq8_focal_sequence_metrics.json",
+    "checkpoint_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\checkpoints\\temporal_alert_224_pretrained_gru_seq8_focal_sequence.pt",
+    "best_checkpoint_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\checkpoints\\temporal_alert_224_pretrained_gru_seq8_focal_best_sequence.pt",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "split_manifest_path": "data\\interim\\sample_100_videos_splits.csv",
+    "split_column": "split",
+    "train_split": "train",
+    "val_split": "val",
+    "figure_prefix": "temporal_alert_224_pretrained_gru_seq8_focal",
+    "sequence_length": "8",
+    "train_sequence_stride": "2",
+    "val_sequence_stride": "1",
+    "batch_size": "8",
+    "epochs": "6",
+    "learning_rate": "0.0001",
+    "head_learning_rate": "0.0001",
+    "cnn_learning_rate": "1e-05",
+    "weight_decay": "0.01",
+    "val_size": "0.2",
+    "random_state": "42",
+    "num_workers": "0",
+    "pretrained": "True",
+    "rnn_type": "gru",
+    "hidden_size": "128",
+    "num_layers": "1",
+    "dropout": "0.2",
+    "bidirectional": "False",
+    "cnn_train_policy": "layer4",
+    "imbalance_strategy": "class_weight",
+    "loss_name": "focal",
+    "focal_gamma": "2.0",
+    "device": "auto",
+    "monitor_metric": "f1",
+    "monitor_mode": "max",
+    "patience": "2",
+    "min_delta": "0.0",
+    "mlflow_enabled": "True",
+    "mlflow_experiment_name": "nexar-collision-prediction",
+    "mlflow_run_name": "None",
+    "mlflow_tracking_uri": "None"
+  },
+  "model_config": {
+    "num_classes": 2,
+    "cnn_backbone": "resnet18",
+    "pretrained": true,
+    "rnn_type": "gru",
+    "hidden_size": 128,
+    "num_layers": 1,
+    "dropout": 0.2,
+    "bidirectional": false,
+    "cnn_train_policy": "layer4"
+  },
+  "device": "cuda",
+  "cuda_available": true,
+  "train_sequences": 3130,
+  "val_sequences": 1551,
+  "train_frames": 6209,
+  "val_frames": 1551,
+  "train_videos": 80,
+  "val_videos": 20,
+  "parameter_counts": {
+    "trainable_parameters": 8640514,
+    "trainable_cnn_parameters": 8393728,
+    "trainable_head_parameters": 246786
+  },
+  "train_target_distribution": {
+    "0": 5846,
+    "1": 363
+  },
+  "val_target_distribution": {
+    "0": 1449,
+    "1": 102
+  },
+  "train_sequence_target_distribution": {
+    "0": 2948,
+    "1": 182
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.1803334938951445,
+      "accuracy": 0.9226305609284333,
+      "precision": 0.29545454545454547,
+      "recall": 0.12745098039215685,
+      "f1": 0.1780821917808219,
+      "roc_auc": 0.5295064885857724,
+      "monitor_metric": "f1",
+      "monitor_value": 0.1780821917808219,
+      "is_best": true
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.1275169809743268,
+      "accuracy": 0.4996776273372018,
+      "precision": 0.07341772151898734,
+      "recall": 0.5686274509803921,
+      "f1": 0.13004484304932734,
+      "roc_auc": 0.5462929133005858,
+      "monitor_metric": "f1",
+      "monitor_value": 0.13004484304932734,
+      "is_best": false
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.09127474205368864,
+      "accuracy": 0.8678272082527402,
+      "precision": 0.10077519379844961,
+      "recall": 0.12745098039215685,
+      "f1": 0.11255411255411256,
+      "roc_auc": 0.5696626476677626,
+      "monitor_metric": "f1",
+      "monitor_value": 0.11255411255411256,
+      "is_best": false
+    }
+  ],
+  "best_epoch": 1,
+  "best_monitor_metric": "f1",
+  "best_monitor_mode": "max",
+  "best_monitor_value": 0.1780821917808219,
+  "best_frame_metrics": {
+    "accuracy": 0.9226305609284333,
+    "precision": 0.29545454545454547,
+    "recall": 0.12745098039215685,
+    "f1": 0.1780821917808219,
+    "roc_auc": 0.5295064885857724
+  },
+  "best_checkpoint_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\checkpoints\\temporal_alert_224_pretrained_gru_seq8_focal_best_sequence.pt",
+  "early_stopped": true,
+  "stopped_epoch": 3,
+  "frame_metrics": {
+    "accuracy": 0.8678272082527402,
+    "precision": 0.10077519379844961,
+    "recall": 0.12745098039215685,
+    "f1": 0.11255411255411256,
+    "roc_auc": 0.5696626476677626
+  }
+}

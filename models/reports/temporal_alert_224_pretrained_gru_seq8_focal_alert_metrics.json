@@ -1,0 +1,53 @@
+{
+  "config": {
+    "manifest_path": "data\\interim\\temporal_frames_224_manifest.csv",
+    "sample_csv": "data\\interim\\sample_100_videos_splits.csv",
+    "split_manifest_path": "data\\interim\\sample_100_videos_splits.csv",
+    "checkpoint_path": "models\\checkpoints\\temporal_alert_224_pretrained_gru_seq8_focal_best_sequence.pt",
+    "risk_scores_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_pretrained_gru_seq8_focal_temporal_risk_scores.csv",
+    "alert_predictions_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\predictions\\temporal_alert_224_pretrained_gru_seq8_focal_alert_predictions.csv",
+    "metrics_path": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\models\\reports\\temporal_alert_224_pretrained_gru_seq8_focal_alert_metrics.json",
+    "figures_dir": "C:\\Users\\z004hn4c\\Documents\\Estudo\\LLMOps And AIOps Bootcamp With 8 End To End Projects\\nexar-dashcam-collision-prediction\\outputs\\figures",
+    "split": "val",
+    "split_column": "split",
+    "sequence_length": "None",
+    "batch_size": "8",
+    "threshold": "0.5",
+    "device": "auto",
+    "mlflow_enabled": "True",
+    "mlflow_experiment_name": "nexar-collision-prediction",
+    "mlflow_run_name": "None",
+    "mlflow_tracking_uri": "None"
+  },
+  "model_config": {
+    "num_classes": 2,
+    "cnn_backbone": "resnet18",
+    "pretrained": true,
+    "rnn_type": "gru",
+    "hidden_size": 128,
+    "num_layers": 1,
+    "dropout": 0.2,
+    "bidirectional": false,
+    "cnn_train_policy": "layer4"
+  },
+  "sequence_length": 8,
+  "device": "cuda",
+  "cuda_available": true,
+  "metrics": {
+    "videos": 20,
+    "positive_videos": 10,
+    "negative_videos": 10,
+    "predicted_alerts": 5,
+    "true_positive_alerts": 2,
+    "false_positive_alerts": 3,
+    "missed_events": 8,
+    "alert_precision": 0.4,
+    "alert_recall": 0.2,
+    "false_alarm_rate": 0.3,
+    "missed_event_rate": 0.8,
+    "mean_predicted_lead_time": 14.6055,
+    "median_predicted_lead_time": 14.6055,
+    "mean_alert_time_error": -13.374,
+    "median_alert_time_error": -13.374
+  }
+}
